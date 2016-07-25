@@ -342,12 +342,12 @@ WITH-POINTER-TO-VECTOR-DATA."
 ;;; respective library at compile-time.
 (setf c::top-level-lambda-max 0)
 
-(defun %load-foreign-library (name path)
+(defun %load-foreign-library (name path dont-save)
   "Load the foreign library NAME."
   ;; On some platforms SYS::LOAD-OBJECT-FILE signals an error when
   ;; loading fails, but on others (Linux for instance) it returns
   ;; two values: NIL and an error string.
-  (declare (ignore name))
+  (declare (ignore name dont-save))
   (multiple-value-bind (ret message)
       (sys::load-object-file path)
     (cond

@@ -135,7 +135,8 @@
    (spec :initarg :spec)
    (options :initform nil :initarg :options)
    (handle :initform nil :initarg :handle :accessor foreign-library-handle)
-   (pathname :initform nil)))
+   (pathname :initform nil)
+   (dont-save :initform nil :initarg :dont-save :accessor dont-save)))
 
 (defmethod print-object ((library foreign-library) stream)
   (with-slots (name pathname) library
@@ -292,13 +293,14 @@ the USE-FOREIGN-LIBRARY macro."
 
 ;;;# Loading Foreign Libraries
 
-(defun load-darwin-framework (name framework-name)
+(defun load-darwin-framework (name framework-name dont-save)
   "Tries to find and load a darwin framework in one of the directories
 in *DARWIN-FRAMEWORK-DIRECTORIES*. If unable to find FRAMEWORK-NAME,
 it signals a LOAD-FOREIGN-LIBRARY-ERROR."
   (let ((framework (find-darwin-framework framework-name)))
     (if framework
-        (load-foreign-library-path name (native-namestring framework))
+        (load-foreign-library-path name (native-namestring framework) nil
+                                   dont-save)
         (fl-error "Unable to find framework ~A" framework-name))))
 
 (defun report-simple-error (name error)
@@ -310,29 +312,30 @@ it signals a LOAD-FOREIGN-LIBRARY-ERROR."
 ;;; FIXME: haven't double checked whether all Lisps signal a
 ;;; SIMPLE-ERROR on %load-foreign-library failure.  In any case they
 ;;; should be throwing a more specific error.
-(defun load-foreign-library-path (name path &optional search-path)
+(defun load-foreign-library-path (name path &optional search-path dont-save)
   "Tries to load PATH using %LOAD-FOREIGN-LIBRARY which should try and
 find it using the OS's usual methods. If that fails we try to find it
 ourselves."
   (handler-case
-      (values (%load-foreign-library name path)
+      (values (%load-foreign-library name path dont-save)
               (pathname path))
     (error (error)
       (let ((dirs (parse-directories *foreign-library-directories*)))
         (if-let (file (find-file path (append search-path dirs)))
           (handler-case
-              (values (%load-foreign-library name (native-namestring file))
+              (values (%load-foreign-library name (native-namestring file)
+                                             dont-save)
                       file)
             (simple-error (error)
               (report-simple-error name error)))
           (report-simple-error name error))))))
 
-(defun try-foreign-library-alternatives (name library-list)
+(defun try-foreign-library-alternatives (name library-list dont-save)
   "Goes through a list of alternatives and only signals an error when
 none of alternatives were successfully loaded."
   (dolist (lib library-list)
     (multiple-value-bind (handle pathname)
-        (ignore-errors (load-foreign-library-helper name lib))
+        (ignore-errors (load-foreign-library-helper name lib nil dont-save))
       (when handle
         (return-from try-foreign-library-alternatives
           (values handle pathname)))))
@@ -354,13 +357,14 @@ This will need to be extended as we test on more OSes."
   (or (cdr (assoc-if #'featurep *cffi-feature-suffix-map*))
       (fl-error "Unable to determine the default library suffix on this OS.")))
 
-(defun load-foreign-library-helper (name thing &optional search-path)
+(defun load-foreign-library-helper (name thing &optional search-path dont-save)
   (etypecase thing
     ((or pathname string)
-     (load-foreign-library-path (filter-pathname name) thing search-path))
+     (load-foreign-library-path (filter-pathname name) thing search-path
+                                dont-save))
     (cons
      (ecase (first thing)
-       (:framework (load-darwin-framework name (second thing)))
+       (:framework (load-darwin-framework name (second thing) dont-save))
        (:default
         (unless (stringp (second thing))
           (fl-error "Argument to :DEFAULT must be a string."))
@@ -368,16 +372,16 @@ This will need to be extended as we test on more OSes."
                (concatenate 'string
                             (second thing)
                             (default-library-suffix))))
-          (load-foreign-library-path name library-path search-path)))
-       (:or (try-foreign-library-alternatives name (rest thing)))))))
+          (load-foreign-library-path name library-path search-path dont-save)))
+       (:or (try-foreign-library-alternatives name (rest thing) dont-save))))))
 
 (defun %do-load-foreign-library (library search-path)
   (flet ((%do-load (lib name spec)
            (when (foreign-library-spec lib)
-             (with-slots (handle pathname) lib
+             (with-slots (handle pathname dont-save) lib
                (setf (values handle pathname)
                      (load-foreign-library-helper
-                      name spec (foreign-library-search-path lib)))))
+                      name spec (foreign-library-search-path lib) dont-save))))
            lib))
     (etypecase library
       (symbol
@@ -394,7 +398,8 @@ This will need to be extended as we test on more OSes."
                                   :type :system
                                   :name lib-name
                                   :spec `((t ,library))
-                                  :search-path search-path)))
+                                  :search-path search-path
+                                  :dont-save nil)))
          ;; first try to load the anonymous library
          ;; and register it only if that worked
          (%do-load lib lib-name library)
@@ -451,7 +456,8 @@ or finally list: either (:or lib1 lib2) or (:framework <framework-name>)."
   "(Re)load all currently loaded foreign libraries."
   (let ((libs (list-foreign-libraries)))
     (loop for l in libs
-          for name = (foreign-library-name l)
+         for name = (foreign-library-name l)
+         for dont-save = (dont-save l)
           when (funcall test name)
             do (load-foreign-library name))
     libs))

@@ -145,13 +145,13 @@ WITH-POINTER-TO-VECTOR-DATA."
   "Return the address of VECTOR's data."
   (check-type vector (vector (unsigned-byte 8)))
   #-mingw64
-  (ffi:c-inline (vector) (object) 
+  (ffi:c-inline (vector) (object)
                 :unsigned-long
                 "(uintptr_t) #0->vector.self.b8"
                 :side-effects nil
                 :one-liner t)
   #+mingw64
-  (ffi:c-inline (vector) (object) 
+  (ffi:c-inline (vector) (object)
                 :unsigned-long-long
                 "(uintptr_t) #0->vector.self.b8"
                 :side-effects nil
@@ -277,9 +277,9 @@ WITH-POINTER-TO-VECTOR-DATA."
 
 ;;;# Foreign Libraries
 
-(defun %load-foreign-library (name path)
+(defun %load-foreign-library (name path dont-save)
   "Load a foreign library."
-  (declare (ignore name))
+  (declare (ignore name dont-save))
   (handler-case (si:load-foreign-module path)
     (file-error ()
       (error "file error while trying to load `~A'" path))))
@@ -339,4 +339,3 @@ WITH-POINTER-TO-VECTOR-DATA."
   "Returns a pointer to a foreign symbol NAME."
   (declare (ignore library))
   (values (ignore-errors (si:find-foreign-symbol name :default :pointer-void 0))))
-

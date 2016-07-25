@@ -294,8 +294,9 @@ the DLL's name (a string), else returns NIL."
 
 ;;;# Loading Foreign Libraries
 
-(defun %load-foreign-library (name)
+(defun %load-foreign-library (name path dont-save)
   "Load the foreign library NAME."
+  (declare (ignore path dont-save))
   (ct::get-dll-record name))
 
 (defun %close-foreign-library (name)

@@ -408,14 +408,14 @@ WITH-POINTER-TO-VECTOR-DATA."
 
 ;;;# Loading and Closing Foreign Libraries
 
-(defun %load-foreign-library (name path)
+(defun %load-foreign-library (name path dont-save)
   "Load a foreign library."
   ;; ACL 8.0 honors the :FOREIGN option and always tries to foreign load
   ;; the argument. However, previous versions do not and will only
   ;; foreign load the argument if its type is a member of the
   ;; EXCL::*LOAD-FOREIGN-TYPES* list. Therefore, we bind that special
   ;; to a list containing whatever type NAME has.
-  (declare (ignore name))
+  (declare (ignore name dont-save))
   (let ((excl::*load-foreign-types*
          (list (pathname-type (parse-namestring path)))))
     (handler-case

@@ -405,9 +405,9 @@ the function call."
 
 ;;;# Loading and Closing Foreign Libraries
 
-(defun %load-foreign-library (name path)
+(defun %load-foreign-library (name path dont-save)
   "Load a foreign library from PATH."
-  (declare (ignore name))
+  (declare (ignore name dont-save))
   #+#.(cffi-sys::post-2.45-ffi-interface-p)
   (ffi:open-foreign-library path)
   #-#.(cffi-sys::post-2.45-ffi-interface-p)

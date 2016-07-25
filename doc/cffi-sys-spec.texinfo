@@ -290,8 +290,12 @@ string @var{name}.
 @node Loading Foreign Libraries
 @chapter Loading Foreign Libraries
 
-@defun %load-foreign-library name @result{} unspecified
+@defun %load-foreign-library name path dont-save @result{} unspecified
 Load the foreign shared library @var{name}.
+
+@var{dont-save} is only supported on some platforms, however where it is,
+it is used to control whether the library's location is stored when a
+core-image is save so it can be automatically reloaded.
 
 @impnote{There is a lot of behavior to decide here.  Currently I lean
 toward not requiring NAME to be a full path to the library so

@@ -83,8 +83,9 @@
 
 (defparameter *loaded-libraries* (make-hash-table))
 
-(defun %load-foreign-library (name path)
+(defun %load-foreign-library (name path dont-save)
   "Load a foreign library, signals a simple error on failure."
+  (declare (ignore dont-save))
   (flet ((load-and-register (name path)
            (let ((lib (jstatic "getInstance" "com.sun.jna.NativeLibrary" path)))
              (setf (gethash name *loaded-libraries*) lib)

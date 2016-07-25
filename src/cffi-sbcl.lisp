@@ -362,13 +362,14 @@ WITH-POINTER-TO-VECTOR-DATA."
         result)))
 
 (declaim (inline %load-foreign-library))
-(defun %load-foreign-library (name path)
+(defun %load-foreign-library (name path dont-save)
   "Load a foreign library."
   (declare (ignore name))
   ;; As of MacOS X 10.6.6, loading things like CoreFoundation from a
   ;; thread other than the initial one results in a crash.
-  #+darwin (call-within-initial-thread 'load-shared-object path)
-  #-darwin (load-shared-object path))
+  #+darwin (call-within-initial-thread 'load-shared-object path
+                                       :dont-save dont-save)
+  #-darwin (load-shared-object path :dont-save dont-save))
 
 ;;; SBCL 1.0.21.15 renamed SB-ALIEN::SHARED-OBJECT-FILE but introduced
 ;;; SB-ALIEN:UNLOAD-SHARED-OBJECT which we can use instead.

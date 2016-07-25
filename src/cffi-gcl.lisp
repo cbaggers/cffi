@@ -301,9 +301,9 @@ SIZE-VAR is supplied, it will be bound to SIZE during BODY."
 
 ;;;# Loading Foreign Libraries
 
-(defun %load-foreign-library (name)
+(defun %load-foreign-library (name path dont-save)
   "_Won't_ load the foreign library NAME."
-  (declare (ignore name)))
+  (declare (ignore name path dont-save)))
 
 ;;;# Foreign Globals
 

@@ -356,9 +356,9 @@ WITH-POINTER-TO-VECTOR-DATA."
 
 ;;;# Foreign Libraries
 
-(defun %load-foreign-library (name path)
+(defun %load-foreign-library (name path dont-save)
   "Load a foreign library."
-  (declare (ignore name))
+  (declare (ignore name dont-save))
   #-dffi (error "LOAD-FOREIGN-LIBRARY requires ECL's DFFI support. Use ~
                  FFI:LOAD-FOREIGN-LIBRARY with a constant argument instead.")
   #+dffi

@@ -395,8 +395,9 @@ and caches it if necessary.  Finally calls it."
 
 ;;;# Loading Foreign Libraries
 
-(defun %load-foreign-library (name path)
+(defun %load-foreign-library (name path dont-save)
   "Load the foreign library NAME."
+  (declare (ignore dont-save))
   (fli:register-module (or name path) :connection-style :immediate
                        :real-name path))
 

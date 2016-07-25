@@ -301,9 +301,9 @@
 
 ;;;# Loading and Closing Foreign Libraries
 
-(defun %load-foreign-library (name path)
+(defun %load-foreign-library (name path dont-save)
   "Load the foreign library 'name."
-  (declare (ignore name))
+  (declare (ignore name dont-save))
   (ext:load-dynamic-object path))
 
 (defun %close-foreign-library (name)

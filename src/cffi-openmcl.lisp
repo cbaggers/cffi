@@ -292,9 +292,9 @@ WITH-POINTER-TO-VECTOR-DATA."
 
 ;;;# Loading Foreign Libraries
 
-(defun %load-foreign-library (name path)
+(defun %load-foreign-library (name path dont-save)
   "Load the foreign library NAME."
-  (declare (ignore name))
+  (declare (ignore name dont-save))
   (open-shared-library path))
 
 (defun %close-foreign-library (name)

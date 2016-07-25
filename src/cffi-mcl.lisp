@@ -30,7 +30,7 @@
 ;;; - integer vector arguments are copied
 ;;; - return values are not typed
 ;;; - a shared library must be packaged as a framework and statically loaded
-;;; 
+;;;
 ;;; on the topic of shared libraries, see
 ;;; http://developer.apple.com/library/mac/#documentation/DeveloperTools/Conceptual/MachOTopics/1-Articles/loading_code.html
 ;;; which describes how to package a shared library as a framework.
@@ -357,9 +357,9 @@ WITH-POINTER-TO-VECTOR-DATA."
 
 ;;;# Loading Foreign Libraries
 
-(defun %load-foreign-library (name path)
+(defun %load-foreign-library (name path dont-save)
   "Load the foreign library NAME."
-  (declare (ignore path))
+  (declare (ignore path dont-save))
   (setf name (string name))
   ;; for mcl emulate this wrt frameworks
   (unless (and (> (length name) 10)
